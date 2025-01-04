@@ -70,28 +70,33 @@
 
     iframe {
       width: 100%;
-      height: calc(100% - 80px); /* Adjusted to account for Logout and Delete Account buttons */
+      height: calc(100% - 100px); /* Adjusted to account for Logout and Delete Account buttons */
       border: none;
     }
 
     .logout-container {
-      height: 80px;
+      height: auto;
       text-align: center;
       background-color: #00ffeb;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
+      padding: 10px;
+      box-sizing: border-box;
     }
 
     .logout-button, .delete-button {
-      padding: 10px 20px;
+      width: 90%;
+      max-width: 200px;
+      margin: 10px 0;
+      padding: 10px;
       background-color: white;
       color: black;
       border: 2px solid #00cbb3;
       border-radius: 5px;
       cursor: pointer;
-      margin: 5px;
+      box-sizing: border-box;
     }
 
     .logout-button:hover, .delete-button:hover {
@@ -233,7 +238,7 @@
           messageElement.style.color = "green";
           messageElement.innerText = "Account created successfully!";
           localStorage.setItem("loggedIn", "true");
-          localStorage.setItem("currentUser", username); // Save the current user's username
+          localStorage.setItem("currentUser", username);
           showEmbedPage();
         }
       } else {
@@ -252,7 +257,7 @@
     function showEmbedPage() {
       document.getElementById("auth-container").style.display = "none";
       document.getElementById("embed-page").style.display = "block";
-      document.getElementById("footer-auth").style.display = "none";  // Hide footer on embed page
+      document.getElementById("footer-auth").style.display = "none";
     }
 
     function showLogoutDialog() {
@@ -265,11 +270,11 @@
 
     function logout() {
       localStorage.setItem("loggedIn", "false");
-      localStorage.removeItem("currentUser"); // Remove current user
+      localStorage.removeItem("currentUser");
       closeLogoutDialog();
       document.getElementById("embed-page").style.display = "none";
       document.getElementById("auth-container").style.display = "flex";
-      document.getElementById("footer-auth").style.display = "block";  // Show footer on auth page
+      document.getElementById("footer-auth").style.display = "block";
     }
 
     function showDeleteDialog() {
@@ -283,14 +288,14 @@
     function deleteAccount() {
       const currentUser = localStorage.getItem("currentUser");
       if (currentUser) {
-        localStorage.removeItem(currentUser); // Remove the user data
+        localStorage.removeItem(currentUser);
         localStorage.setItem("loggedIn", "false");
-        localStorage.removeItem("currentUser"); // Remove current user data
+        localStorage.removeItem("currentUser");
         closeDeleteDialog();
         alert("Your account has been deleted.");
         document.getElementById("embed-page").style.display = "none";
         document.getElementById("auth-container").style.display = "flex";
-        document.getElementById("footer-auth").style.display = "block";  // Show footer on auth page
+        document.getElementById("footer-auth").style.display = "block";
       }
     }
   </script>
