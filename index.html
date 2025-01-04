@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Embed Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #00ffeb;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .form-container {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      width: 300px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      width: 95%;
+      padding: 10px;
+      background-color: #00ffeb;
+      color: black;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #00cbb3;
+    }
+
+    .message {
+      margin-top: 10px;
+      color: red;
+    }
+
+    #embed-page {
+      display: none;
+      height: 100vh;
+      background-color: white;
+    }
+
+    iframe {
+      width: 100%;
+      height: calc(100% - 50px);
+      border: none;
+    }
+
+    .logout-container {
+      height: 50px;
+      text-align: center;
+      background-color: #00ffeb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .logout-button {
+      padding: 10px 20px;
+      background-color: white;
+      color: black;
+      border: 2px solid #00cbb3;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .logout-button:hover {
+      background-color: #00cbb3;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="auth-container">
+    <div class="form-container" id="form-container">
+      <h2 id="form-title">Sign Up</h2>
+      <input type="text" id="username" placeholder="Username" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button onclick="handleAuth()">Submit</button>
+      <p id="toggle-text">
+        Already have an account? <span onclick="toggleForm()" style="color: blue; cursor: pointer;">Login</span>
+      </p>
+      <p class="message" id="message"></p>
+    </div>
+  </div>
+
+  <div id="embed-page">
+    <iframe src="https://anitoono.blogspot.com/"></iframe>
+    <div class="logout-container">
+      <button class="logout-button" onclick="confirmLogout()">Logout</button>
+    </div>
+  </div>
+
+  <script>
+    let isSignup = true;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (localStorage.getItem("loggedIn") === "true") {
+        showEmbedPage();
+      }
+    });
+
+    function toggleForm() {
+      isSignup = !isSignup;
+      document.getElementById("form-title").innerText = isSignup ? "Sign Up" : "Login";
+      document.getElementById("toggle-text").innerHTML = isSignup
+        ? 'Already have an account? <span onclick="toggleForm()" style="color: blue; cursor: pointer;">Login</span>'
+        : 'Don\'t have an account? <span onclick="toggleForm()" style="color: blue; cursor: pointer;">Sign Up</span>';
+      document.getElementById("message").innerText = "";
+    }
+
+    function handleAuth() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      const messageElement = document.getElementById("message");
+
+      if (!username || !password) {
+        messageElement.innerText = "Please fill out all fields.";
+        return;
+      }
+
+      if (isSignup) {
+        if (localStorage.getItem(username)) {
+          messageElement.innerText = "Username already exists.";
+        } else {
+          localStorage.setItem(username, password);
+          messageElement.style.color = "green";
+          messageElement.innerText = "Account created successfully!";
+          localStorage.setItem("loggedIn", "true");
+          showEmbedPage();
+        }
+      } else {
+        const storedPassword = localStorage.getItem(username);
+        if (storedPassword === password) {
+          localStorage.setItem("loggedIn", "true");
+          showEmbedPage();
+        } else {
+          messageElement.innerText = "Invalid username or password.";
+        }
+      }
+    }
+
+    function showEmbedPage() {
+      document.getElementById("auth-container").style.display = "none";
+      document.getElementById("embed-page").style.display = "block";
+    }
+
+    function confirmLogout() {
+      if (confirm("Are you sure you want to logout?")) {
+        localStorage.setItem("loggedIn", "false");
+        document.getElementById("embed-page").style.display = "none";
+        document.getElementById("auth-container").style.display = "flex";
+      }
+    }
+  </script>
+</body>
+  </html>
