@@ -10,6 +10,7 @@
       margin: 0;
       padding: 0;
       background-color: #00ffeb;
+      height: 100%;
     }
 
     .container {
@@ -69,31 +70,80 @@
 
     iframe {
       width: 100%;
-      height: calc(100% - 50px);
+      height: calc(100% - 80px); /* Adjusted to account for Logout and Delete Account buttons */
       border: none;
     }
 
     .logout-container {
-      height: 50px;
+      height: 80px;
       text-align: center;
       background-color: #00ffeb;
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
     }
 
-    .logout-button {
+    .logout-button, .delete-button {
       padding: 10px 20px;
       background-color: white;
       color: black;
       border: 2px solid #00cbb3;
       border-radius: 5px;
       cursor: pointer;
+      margin: 5px;
     }
 
-    .logout-button:hover {
+    .logout-button:hover, .delete-button:hover {
       background-color: #00cbb3;
       color: white;
+    }
+
+    /* Custom Dialog Style */
+    .dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .dialog-box {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      width: 300px;
+    }
+
+    .dialog-box button {
+      margin-top: 10px;
+      width: 100px;
+      padding: 10px;
+      background-color: #00ffeb;
+      color: black;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .dialog-box button:hover {
+      background-color: #00cbb3;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #00ffeb;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -102,6 +152,7 @@
     <div class="form-container" id="form-container">
       <h2 id="form-title">Sign Up</h2>
       <input type="text" id="username" placeholder="Username" required />
+      <input type="email" id="email" placeholder="Email" required />
       <input type="password" id="password" placeholder="Password" required />
       <button onclick="handleAuth()">Submit</button>
       <p id="toggle-text">
@@ -114,9 +165,33 @@
   <div id="embed-page">
     <iframe src="https://anitoono.blogspot.com/"></iframe>
     <div class="logout-container">
-      <button class="logout-button" onclick="confirmLogout()">Logout</button>
+      <button class="logout-button" onclick="showLogoutDialog()">Logout</button>
+      <button class="delete-button" onclick="showDeleteDialog()">Delete Account</button>
     </div>
   </div>
+
+  <!-- Custom Logout Dialog -->
+  <div class="dialog-overlay" id="logout-dialog">
+    <div class="dialog-box">
+      <h3>Are you sure you want to logout?</h3>
+      <button onclick="logout()">Yes, Logout</button>
+      <button onclick="closeLogoutDialog()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Custom Delete Account Dialog -->
+  <div class="dialog-overlay" id="delete-dialog">
+    <div class="dialog-box">
+      <h3>Are you sure you want to delete your account?</h3>
+      <button onclick="deleteAccount()">Yes, Delete</button>
+      <button onclick="closeDeleteDialog()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Footer for Auth Pages -->
+  <footer id="footer-auth">
+    Powered by Anitoono
+  </footer>
 
   <script>
     let isSignup = true;
@@ -134,14 +209,18 @@
         ? 'Already have an account? <span onclick="toggleForm()" style="color: blue; cursor: pointer;">Login</span>'
         : 'Don\'t have an account? <span onclick="toggleForm()" style="color: blue; cursor: pointer;">Sign Up</span>';
       document.getElementById("message").innerText = "";
+
+      // Hide email field when on login page
+      document.getElementById("email").style.display = isSignup ? "block" : "none";
     }
 
     function handleAuth() {
       const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       const messageElement = document.getElementById("message");
 
-      if (!username || !password) {
+      if (!username || !password || (isSignup && !email)) {
         messageElement.innerText = "Please fill out all fields.";
         return;
       }
@@ -150,16 +229,19 @@
         if (localStorage.getItem(username)) {
           messageElement.innerText = "Username already exists.";
         } else {
-          localStorage.setItem(username, password);
+          localStorage.setItem(username, JSON.stringify({ email, password }));
           messageElement.style.color = "green";
           messageElement.innerText = "Account created successfully!";
           localStorage.setItem("loggedIn", "true");
+          localStorage.setItem("currentUser", username); // Save the current user's username
           showEmbedPage();
         }
       } else {
-        const storedPassword = localStorage.getItem(username);
+        const storedData = localStorage.getItem(username);
+        const storedPassword = storedData ? JSON.parse(storedData).password : null;
         if (storedPassword === password) {
           localStorage.setItem("loggedIn", "true");
+          localStorage.setItem("currentUser", username);
           showEmbedPage();
         } else {
           messageElement.innerText = "Invalid username or password.";
@@ -170,15 +252,47 @@
     function showEmbedPage() {
       document.getElementById("auth-container").style.display = "none";
       document.getElementById("embed-page").style.display = "block";
+      document.getElementById("footer-auth").style.display = "none";  // Hide footer on embed page
     }
 
-    function confirmLogout() {
-      if (confirm("Are you sure you want to logout?")) {
+    function showLogoutDialog() {
+      document.getElementById("logout-dialog").style.display = "flex";
+    }
+
+    function closeLogoutDialog() {
+      document.getElementById("logout-dialog").style.display = "none";
+    }
+
+    function logout() {
+      localStorage.setItem("loggedIn", "false");
+      localStorage.removeItem("currentUser"); // Remove current user
+      closeLogoutDialog();
+      document.getElementById("embed-page").style.display = "none";
+      document.getElementById("auth-container").style.display = "flex";
+      document.getElementById("footer-auth").style.display = "block";  // Show footer on auth page
+    }
+
+    function showDeleteDialog() {
+      document.getElementById("delete-dialog").style.display = "flex";
+    }
+
+    function closeDeleteDialog() {
+      document.getElementById("delete-dialog").style.display = "none";
+    }
+
+    function deleteAccount() {
+      const currentUser = localStorage.getItem("currentUser");
+      if (currentUser) {
+        localStorage.removeItem(currentUser); // Remove the user data
         localStorage.setItem("loggedIn", "false");
+        localStorage.removeItem("currentUser"); // Remove current user data
+        closeDeleteDialog();
+        alert("Your account has been deleted.");
         document.getElementById("embed-page").style.display = "none";
         document.getElementById("auth-container").style.display = "flex";
+        document.getElementById("footer-auth").style.display = "block";  // Show footer on auth page
       }
     }
   </script>
 </body>
-  </html>
+</html>
