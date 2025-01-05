@@ -66,40 +66,36 @@
       display: none;
       height: 100vh;
       background-color: white;
+      display: flex;
+      flex-direction: column;
     }
 
     iframe {
       width: 100%;
-      height: calc(100% - 100px); /* Adjusted to account for Logout and Delete Account buttons */
+      height: calc(100% - 60px); /* Adjusted to account for the header height */
       border: none;
     }
 
-    .logout-container {
-      height: auto;
-      text-align: center;
+    .header {
+      height: 60px;
       background-color: #00ffeb;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
       align-items: center;
-      padding: 10px;
-      box-sizing: border-box;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .logout-button, .delete-button {
-      width: 90%;
-      max-width: 200px;
-      margin: 10px 0;
-      padding: 10px;
+    .header button {
+      padding: 8px 15px;
       background-color: white;
       color: black;
       border: 2px solid #00cbb3;
       border-radius: 5px;
       cursor: pointer;
-      box-sizing: border-box;
     }
 
-    .logout-button:hover, .delete-button:hover {
+    .header button:hover {
       background-color: #00cbb3;
       color: white;
     }
@@ -168,11 +164,11 @@
   </div>
 
   <div id="embed-page">
-    <iframe src="https://anitoono.blogspot.com/"></iframe>
-    <div class="logout-container">
-      <button class="logout-button" onclick="showLogoutDialog()">Logout</button>
-      <button class="delete-button" onclick="showDeleteDialog()">Delete Account</button>
+    <div class="header">
+      <button onclick="showLogoutDialog()">Logout</button>
+      <button onclick="showDeleteDialog()">Delete Account</button>
     </div>
+    <iframe src="https://anitoono.blogspot.com/"></iframe>
   </div>
 
   <!-- Custom Logout Dialog -->
@@ -238,7 +234,7 @@
           messageElement.style.color = "green";
           messageElement.innerText = "Account created successfully!";
           localStorage.setItem("loggedIn", "true");
-          localStorage.setItem("currentUser", username);
+          localStorage.setItem("currentUser", username); // Save the current user's username
           showEmbedPage();
         }
       } else {
@@ -256,8 +252,8 @@
 
     function showEmbedPage() {
       document.getElementById("auth-container").style.display = "none";
-      document.getElementById("embed-page").style.display = "block";
-      document.getElementById("footer-auth").style.display = "none";
+      document.getElementById("embed-page").style.display = "flex";
+      document.getElementById("footer-auth").style.display = "none";  // Hide footer on embed page
     }
 
     function showLogoutDialog() {
@@ -270,11 +266,11 @@
 
     function logout() {
       localStorage.setItem("loggedIn", "false");
-      localStorage.removeItem("currentUser");
+      localStorage.removeItem("currentUser"); // Remove current user
       closeLogoutDialog();
       document.getElementById("embed-page").style.display = "none";
       document.getElementById("auth-container").style.display = "flex";
-      document.getElementById("footer-auth").style.display = "block";
+      document.getElementById("footer-auth").style.display = "block";  // Show footer on auth page
     }
 
     function showDeleteDialog() {
@@ -288,14 +284,13 @@
     function deleteAccount() {
       const currentUser = localStorage.getItem("currentUser");
       if (currentUser) {
-        localStorage.removeItem(currentUser);
+        localStorage.removeItem(currentUser); // Remove the user data
         localStorage.setItem("loggedIn", "false");
-        localStorage.removeItem("currentUser");
+        localStorage.removeItem("currentUser"); // Remove current user data
         closeDeleteDialog();
         alert("Your account has been deleted.");
         document.getElementById("embed-page").style.display = "none";
         document.getElementById("auth-container").style.display = "flex";
-        document.getElementById("footer-auth").style.display = "block";
       }
     }
   </script>
